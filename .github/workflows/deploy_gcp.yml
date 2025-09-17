@@ -15,8 +15,8 @@ jobs:
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.GCP_KEY }}" > ~/.ssh/kejahunt_key
-        chmod 600 ~/.ssh/kejahunt_key
+        echo "${{ secrets.GCP_KEY }}" > ~/.ssh/jujafoods_key
+        chmod 600 ~/.ssh/jujafoods_key
 
     - name: Install Ansible
       run: |
@@ -28,6 +28,6 @@ jobs:
         ansible-playbook ansible/deployment.yml \
           -i ansible/inventory.yml \
           -e "server_ip=${{ secrets.GCP_IP }}" \
-          -e "ssh_private_key_file=~/.ssh/kejahunt_key" \
+          -e "ssh_private_key_file=~/.ssh/jujafoods_key" \
           -e "google_client_id=${{ secrets.GOOGLE_CLIENT_ID }}" \
           -e "google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}"

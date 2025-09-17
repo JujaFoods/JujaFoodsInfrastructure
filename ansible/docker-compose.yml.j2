@@ -1,87 +1,19 @@
 services:
-  # Redis Cache Service
-  redis:
-    image: redis:7-alpine
-    container_name: nivela-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      # Persist Redis data to host storage
-      - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: redis-server /usr/local/etc/redis/redis.conf
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 800M
-          cpus: '0.5'
-        reservations:
-          memory: 512M
-          cpus: '0.25'
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - nivela-network
-
-  frontend:
-    image: kalukwo/nivela-ui:latest
-    container_name: nivela-frontend
-    ports:
-      - "80:80"
-    environment:
-      - API_BASE_URL=https://nivela.duckdns.org/api
-    restart: unless-stopped
-    depends_on:
-      - backend
-    networks:
-      - nivela-network
-
   backend:
-    image: kalukwo/nivela-backend:latest
-    container_name: nivela-backend
+    image: kalukwo/juja-foods-api:latest
+    container_name: jujafoods-backend
     ports:
-      - "5000:8080"
-    volumes:
-      - data-protection-keys:/app/keys   
+      - "5000:8080" 
     environment:
-      - ConnectionStrings__DefaultConnection=Host=34.41.232.227;Database=NivelaDb;Username=postgres;Password=KejaHUnT@2217;Port=5432;
-      - ConnectionStrings__RedisConnection=redis:6379
+      - ConnectionStrings__DefaultConnection=Host=34.41.232.227;Database=JujaFoodsDb;Username=postgres;Password=KejaHUnT@2217;Port=5432;
       - ASPNETCORE_ENVIRONMENT=Production
-      - Authentication__Google__ClientId={{ google_client_id }}
-      - Authentication__Google__ClientSecret={{ google_client_secret }}
-      - Frontend__BaseUrl=https://nivela.duckdns.org
-      - Jwt__Key=werthggkarokgusnbcvbnmjgffchjgxv
-      - Jwt__Issuer=https://nivela.duckdns.org
-      - Jwt__Audience=https://nivela.duckdns.org
     depends_on:
       - migrations-backend
-      - redis
     restart: unless-stopped
-    networks:
-      - nivela-network
 
   migrations-backend:
-    image: kalukwo/nivela-backend:migrations
-    container_name: nivela-migrations
+    image: kalukwo/juja-foods-api:migrations
+    container_name: jujafoods-migrations
     environment:
-      - ConnectionStrings__DefaultConnection=Host=34.41.232.227;Database=NivelaDb;Username=postgres;Password=KejaHUnT@2217;Port=5432;
+      - ConnectionStrings__DefaultConnection=Host=34.41.232.227;Database=JujaFoodsDb;Username=postgres;Password=KejaHUnT@2217;Port=5432;
     restart: "no"
-    depends_on:
-      - redis
-    networks:
-      - nivela-network
-
-# Volumes for data persistence
-volumes:
-  data-protection-keys:
-  redis_data:
-    driver: local
-
-# Network for inter-container communication
-networks:
-  nivela-network:
-    driver: bridge
